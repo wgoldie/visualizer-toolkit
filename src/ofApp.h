@@ -35,6 +35,8 @@ class ofApp : public ofBaseApp{
 
 		ofSoundStream soundStream;
 
+		ofxGuiGroup gui;
+
 		ofxPanel shape;
 		ofParameterGroup shapeParamGroup;
 		ofParameter<int> gridX;
@@ -60,6 +62,10 @@ class ofApp : public ofBaseApp{
 		ofParameter<ofColor> polyColor;
 		ofParameter<ofColor> bgColor;
 		ofParameter<ofColor> wireframeColor;
+
+		ofxPanel render;
+		ofParameterGroup renderParamGroup;
+		ofParameter<float> fadeScale;
 
 		ofMesh mesh;
 		ofNode meshNode;

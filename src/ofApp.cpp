@@ -26,22 +26,37 @@ void ofApp::setupGui() {
 
 	animationParamGroup.setName("ANIMATION");
 	animationParamGroup.add(gridVibeScale.set("GRID VIBE SCALE", 50, 0, 500));
-	animationParamGroup.add(gridTension.set("GRID TENSION", 0.01, 0, 0.3));
+	animationParamGroup.add(gridTension.set("GRID TENSION", 0., 0, 0.3));
 	animationParamGroup.add(colorVibeScale.set("COLOR VIBE SCALE", 0.2, 0., 0.5));
-	animationParamGroup.add(colorTension.set("COLOR TENSION", 0.01, 0, 0.025));
+	animationParamGroup.add(colorTension.set("COLOR TENSION", 0., 0, 0.025));
 	animationParamGroup.add(wireframeVibeScale.set("WIREFRAME VIBE SCALE", 0.2, 0., 0.5));
-	animationParamGroup.add(wireframeTension.set("WIREFRAME TENSION", 0.01, 0, 0.025));
+	animationParamGroup.add(wireframeTension.set("WIREFRAME TENSION", 0., 0, 0.025));
 	animationParamGroup.add(bgVibeScale.set("BG VIBE SCALE", 0.2, 0., 0.5));
-	animationParamGroup.add(bgTension.set("BG TENSION", 0.01, 0, 0.025));
+	animationParamGroup.add(bgTension.set("BG TENSION", 0., 0, 0.025));
 
 	colorParamGroup.setName("COLORS");
 	colorParamGroup.add(polyColor.set("POLY COLOR", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
 	colorParamGroup.add(wireframeColor.set("WIREFRAME COLOR", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
 	colorParamGroup.add(bgColor.set("BG COLOR", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
 
-	shape.setup(shapeParamGroup);
-	animation.setup(animationParamGroup);
-	color.setup(colorParamGroup);
+	renderParamGroup.setName("RENDER");
+	renderParamGroup.add(fadeScale.set("FADE SCALE", 0.5, 0.0, 1.0));
+
+	gui.setup("GUI");
+	gui.add(renderParamGroup);
+	gui.add(shapeParamGroup);
+	gui.add(colorParamGroup);
+	gui.add(animationParamGroup);
+
+
+	
+	//render.setup(renderParamGroup);
+	//shape.setup(shapeParamGroup, "settings.xml", );
+	//animation.setup(animationParamGroup);
+	//color.setup(colorParamGroup);
+
+	
+
 
 	gridX.addListener(this, &ofApp::regenI);
 	gridY.addListener(this, &ofApp::regenI);
@@ -63,7 +78,7 @@ void ofApp::regenHelper() {
 	meshNode.setPosition(0, 0, 0);
 	switch (shapeType) {
 	case 0:
-		mesh = ofMesh::plane(size * 2, size * 2, gridX, gridY);
+		mesh = ofMesh::plane(size, size, gridX, gridY);
 		break;
 	case 1:
 		mesh = ofMesh::sphere(size, iter);
@@ -125,10 +140,15 @@ void ofApp::audioIn(float *input, int bufferSize, int nChannels, int deviceID, u
 void ofApp::draw(){
 	ofClear(renderBgColor);
 	cam.setTarget(meshNode);
+	cam.setFarClip(2 * cam.getDistance());
+	cam.setNearClip(0.1 * cam.getDistance());
 	cam.begin();	
 		ofPushMatrix();
 		ofSetColor(renderPolyColor);
 		shader.begin();
+		shader.setUniform1f("FAR", cam.getFarClip());
+		shader.setUniform1f("NEAR", cam.getNearClip());
+		shader.setUniform1f("fadeScale", fadeScale);
 		shader.setUniform3f("baseColor", renderPolyColor.r / 255.0, renderPolyColor.g / 255.0, renderPolyColor.b / 255.0);
 		mesh.drawFaces();
 		shader.setUniform3f("baseColor", renderWireFrameColor.r / 255.0, renderWireFrameColor.g / 255.0, renderWireFrameColor.b / 255.0);
@@ -137,9 +157,11 @@ void ofApp::draw(){
 		ofPopMatrix();
 	cam.end();
 	
-	shape.draw();
-	color.draw();
-	animation.draw();
+	gui.draw();
+
+	//shape.draw();
+	//color.draw();
+	//animation.draw();
 
 	if (isRecording) {
 		img.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
