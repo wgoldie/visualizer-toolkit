@@ -1,0 +1,7 @@
+ofx3DModelLoader
+ofxBeat
+ofxGui
+ofxNetwork
+ofxOsc
+ofxScreenSetup
+ofxVideoRecorder
