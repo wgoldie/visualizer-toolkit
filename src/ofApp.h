@@ -3,8 +3,8 @@
 #include "ofMain.h"
 #include "ofxBeat.h"
 #include "ofxGui.h"
-#include "ofxNetwork.h"
 #include "ofxVideoRecorder.h"
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -23,13 +23,15 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+		void audioIn(float *input, int bufferSize, int nChannels, int deviceID, unsigned long long tickCount);
+
+	private:
 		void regenI(int & i);
 		void regenF(float & f);
 		void regenHelper();
 		void setupGui();
 
 		ofxBeat beat;
-		void audioIn(float *input, int bufferSize, int nChannels, int deviceID, unsigned long long tickCount);
 
 		ofSoundStream soundStream;
 
