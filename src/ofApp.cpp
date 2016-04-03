@@ -12,7 +12,8 @@ void ofApp::setup(){
 	setupGui();
 	regenHelper();
 
-	shader.load("shaders/a");
+	polyShader.load("shaders/a");
+	//wireShader.load("shaders/wires")
 }
 
 void ofApp::setupGui() {
@@ -35,12 +36,18 @@ void ofApp::setupGui() {
 	animationParamGroup.add(bgTension.set("BG TENSION", 0., 0, 0.025));
 
 	colorParamGroup.setName("COLORS");
-	colorParamGroup.add(polyColor.set("POLY COLOR", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
 	colorParamGroup.add(wireframeColor.set("WIREFRAME COLOR", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
 	colorParamGroup.add(bgColor.set("BG COLOR", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
 
 	renderParamGroup.setName("RENDER");
-	renderParamGroup.add(fadeScale.set("FADE SCALE", 0.5, 0.0, 1.0));
+	ofVec4f zero = ofVec4f(0., 0., 0., 0.);
+	ofVec4f one = ofVec4f(1.,1.,1.,1.);
+	renderParamGroup.add(xMin.set("xMin", one, zero, one));
+	renderParamGroup.add(xMax.set("xMax", one, zero, one));
+	renderParamGroup.add(yMin.set("yMin", one, zero, one));
+	renderParamGroup.add(yMax.set("yMax", one, zero, one));
+	renderParamGroup.add(fadeScale.set("fadeScale", 0.5, 0.0, 1.0));
+	renderParamGroup.add(gradMix.set("gradMix", 0.5, 0.0, 1.0));
 
 	gui.setup("GUI");
 	gui.add(renderParamGroup);
@@ -122,7 +129,7 @@ void ofApp::update(){
 	}
 
 
-	renderPolyColor.lerp(polyColor, colorVibeScale * beat.kick());
+	//renderPolyColor.lerp(polyColor, colorVibeScale * beat.kick());
 	renderWireFrameColor.lerp(wireframeColor, wireframeVibeScale * beat.hihat());
 	renderBgColor.lerp(ofColor(bgColor, 1.), bgVibeScale * beat.snare());
 
@@ -140,20 +147,16 @@ void ofApp::audioIn(float *input, int bufferSize, int nChannels, int deviceID, u
 void ofApp::draw(){
 	ofClear(renderBgColor);
 	cam.setTarget(meshNode);
-	cam.setFarClip(2 * cam.getDistance());
-	cam.setNearClip(0.1 * cam.getDistance());
 	cam.begin();	
 		ofPushMatrix();
 		ofSetColor(renderPolyColor);
-		shader.begin();
-		shader.setUniform1f("FAR", cam.getFarClip());
-		shader.setUniform1f("NEAR", cam.getNearClip());
-		shader.setUniform1f("fadeScale", fadeScale);
-		shader.setUniform3f("baseColor", renderPolyColor.r / 255.0, renderPolyColor.g / 255.0, renderPolyColor.b / 255.0);
+		polyShader.begin();
+		polyShader.setUniform1f("size", size);
+		polyShader.setUniforms(renderParamGroup);
 		mesh.drawFaces();
-		shader.setUniform3f("baseColor", renderWireFrameColor.r / 255.0, renderWireFrameColor.g / 255.0, renderWireFrameColor.b / 255.0);
+		polyShader.end();
+		ofSetColor(wireframeColor);
 		mesh.drawWireframe();
-		shader.end();
 		ofPopMatrix();
 	cam.end();
 	
@@ -187,6 +190,11 @@ void ofApp::keyPressed(int key) {
 			rec.start();
 			isRecording = true;
 		}
+	}
+
+	if (key == 's') {
+		polyShader.unload();
+		polyShader.load("shaders/a");
 	}
 }
 //--------------------------------------------------------------

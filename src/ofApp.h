@@ -59,13 +59,20 @@ class ofApp : public ofBaseApp{
 
 		ofxPanel color;
 		ofParameterGroup colorParamGroup;
-		ofParameter<ofColor> polyColor;
+		//ofParameter<ofColor> polyColor;
+
+		ofParameter<ofVec4f> xMin;
+		ofParameter<ofVec4f> xMax;
+		ofParameter<ofVec4f> yMin;
+		ofParameter<ofVec4f> yMax;
+
 		ofParameter<ofColor> bgColor;
 		ofParameter<ofColor> wireframeColor;
 
 		ofxPanel render;
 		ofParameterGroup renderParamGroup;
 		ofParameter<float> fadeScale;
+		ofParameter<float> gradMix;
 
 		ofMesh mesh;
 		ofNode meshNode;
@@ -80,5 +87,6 @@ class ofApp : public ofBaseApp{
 		ofColor renderPolyColor;
 		ofColor renderBgColor;
 		ofColor renderWireFrameColor;
-		ofShader shader;
+		ofShader polyShader;
+		//ofShader wireframeShader
 };
