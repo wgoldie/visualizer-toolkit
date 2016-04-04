@@ -17,31 +17,30 @@ void ofApp::setup(){
 }
 
 void ofApp::setupGui() {
+
+	ofVec4f zero = ofVec4f(0., 0., 0., 0.);
+	ofVec4f one = ofVec4f(1., 1., 1., 1.);
+
 	shapeParamGroup.setName("SHAPE");
-	shapeParamGroup.add(shapeType.set("SHAPE TYPE", 0, 0, SHAPE_COUNT - 1));
-	shapeParamGroup.add(size.set("SIZE", 500, 0, 2000));
-	shapeParamGroup.add(iter.set("ITER", 1, 0, 10));
-	shapeParamGroup.add(gridX.set("GRID X", 5, 0, 25));
-	shapeParamGroup.add(gridY.set("GRID Y", 5, 0, 25));
-	shapeParamGroup.add(gridZ.set("GRID Z", 5, 0, 25));
+	shapeParamGroup.add(shapeType.set("shapeType", 0, 0, SHAPE_COUNT - 1));
+	shapeParamGroup.add(size.set("size", ofVec3f(100.,100.,100.), ofVec3f(1., 1., 1.), ofVec3f(500., 500., 500.)));
+	shapeParamGroup.add(grid.set("grid", ofVec3f(5.,5.,5.), ofVec3f(1., 1., 1.), ofVec3f(25, 25, 25)));
 
 	animationParamGroup.setName("ANIMATION");
-	animationParamGroup.add(gridVibeScale.set("GRID VIBE SCALE", 50, 0, 500));
-	animationParamGroup.add(gridTension.set("GRID TENSION", 0., 0, 0.3));
-	animationParamGroup.add(colorVibeScale.set("COLOR VIBE SCALE", 0.2, 0., 0.5));
-	animationParamGroup.add(colorTension.set("COLOR TENSION", 0., 0, 0.025));
-	animationParamGroup.add(wireframeVibeScale.set("WIREFRAME VIBE SCALE", 0.2, 0., 0.5));
-	animationParamGroup.add(wireframeTension.set("WIREFRAME TENSION", 0., 0, 0.025));
-	animationParamGroup.add(bgVibeScale.set("BG VIBE SCALE", 0.2, 0., 0.5));
-	animationParamGroup.add(bgTension.set("BG TENSION", 0., 0, 0.025));
+	animationParamGroup.add(gridVibeScale.set("gridVibeScale", 50, 0, 500));
+	animationParamGroup.add(gridTension.set("gridTension", 0., 0, 0.3));
+	animationParamGroup.add(colorVibeScale.set("colorVibeScale", 0.2, 0., 0.5));
+	animationParamGroup.add(colorTension.set("colorTension", 0., 0, 0.025));
+	animationParamGroup.add(wireframeVibeScale.set("wireframeVibeScale", 0.2, 0., 0.5));
+	animationParamGroup.add(wireframeTension.set("wireframeTension", 0., 0, 0.025));
+	animationParamGroup.add(bgVibeScale.set("bgVibeScale", 0.2, 0., 0.5));
+	animationParamGroup.add(bgTension.set("bgTension", 0., 0, 0.025));
 
-	colorParamGroup.setName("COLORS");
-	colorParamGroup.add(wireframeColor.set("WIREFRAME COLOR", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
-	colorParamGroup.add(bgColor.set("BG COLOR", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
+	colorParamGroup.setName("colors");
+	colorParamGroup.add(wireframeColor.set("wireframeColor", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
+	colorParamGroup.add(bgColor.set("bgColor", ofColor(0, 0), ofColor(0, 0), ofColor(255, 255)));
 
 	renderParamGroup.setName("RENDER");
-	ofVec4f zero = ofVec4f(0., 0., 0., 0.);
-	ofVec4f one = ofVec4f(1.,1.,1.,1.);
 	renderParamGroup.add(xMin.set("xMin", one, zero, one));
 	renderParamGroup.add(xMax.set("xMax", one, zero, one));
 	renderParamGroup.add(yMin.set("yMin", one, zero, one));
@@ -55,22 +54,15 @@ void ofApp::setupGui() {
 	gui.add(colorParamGroup);
 	gui.add(animationParamGroup);
 
-
-	
-	//render.setup(renderParamGroup);
-	//shape.setup(shapeParamGroup, "settings.xml", );
-	//animation.setup(animationParamGroup);
-	//color.setup(colorParamGroup);
-
-	
-
-
-	gridX.addListener(this, &ofApp::regenI);
-	gridY.addListener(this, &ofApp::regenI);
-	gridZ.addListener(this, &ofApp::regenI);
 	shapeType.addListener(this, &ofApp::regenI);
-	iter.addListener(this, &ofApp::regenI);
-	size.addListener(this, &ofApp::regenI);
+	size.addListener(this, &ofApp::regenV3);
+	grid.addListener(this, &ofApp::regenV3);
+
+}
+
+
+void ofApp::regenV3(ofVec3f & v) {
+	regenHelper();
 }
 
 void ofApp::regenI(int & i) {
@@ -83,50 +75,48 @@ void ofApp::regenF(float & f) {
 
 void ofApp::regenHelper() {
 	meshNode.setPosition(0, 0, 0);
+	ofVec3f s = size;
+	ofVec3f g = grid;
 	switch (shapeType) {
 	case 0:
-		mesh = ofMesh::plane(size, size, gridX, gridY);
+		mesh = ofMesh::plane(s.x, s.y, g.x, g.y);
 		break;
 	case 1:
-		mesh = ofMesh::sphere(size, iter);
+		mesh = ofMesh::sphere(s.x, g.x);
 		break;
 	case 2:
-		mesh = ofMesh::box(size, size, size, gridX, gridY, gridZ);
+		mesh = ofMesh::box(s.x, s.y, s.z, g.x, g.y, g.z);
 		break;
 	}
+
+	shadow = ofMesh(mesh);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+	ofVec3f s = size;
 	beat.update(ofGetElapsedTimeMillis());
-	switch (shapeType) {
-	case 0:
-		for (int i = 0; i < mesh.getNumVertices(); i++) {
-			ofVec3f * v = &mesh.getVertices().at(i);
+	for (int i = 0; i < mesh.getNumVertices(); i++) {
+		ofVec3f * v = &mesh.getVertices().at(i);
+		switch (shapeType) {
+		case 0: 
 			v->z += beat.hihat() * ofRandomf() * gridVibeScale;
-			v->z = ofLerp(v->z, 0, gridTension);
-		}
-
-		break;
-	case 1:
-		for (int i = 0; i < mesh.getNumVertices(); i++) {
-			ofVec3f * v = &mesh.getVertices().at(i);
+			break;
+		case 1:
 			if (beat.hihat()) {
 				v->scale(v->length() + ofRandomf() * gridVibeScale);
 			}
-			v->scale(ofLerp(v->length(), size, gridTension));
 
-		}
-
-	case 2:
-		for (int i = 0; i < mesh.getNumVertices(); i++) {
-			ofVec3f * v = &mesh.getVertices().at(i);
+			break;
+		case 2:
 			if (beat.hihat()) {
 				v->scale(v->length() + ofRandomf() * gridVibeScale);
 			}
-			v->scale(ofLerp(v->length(), size / 2, gridTension));
 		}
+
+		v->interpolate(shadow.getVertices().at(i), gridTension);
 	}
+
 
 
 	//renderPolyColor.lerp(polyColor, colorVibeScale * beat.kick());
@@ -151,7 +141,7 @@ void ofApp::draw(){
 		ofPushMatrix();
 		ofSetColor(renderPolyColor);
 		polyShader.begin();
-		polyShader.setUniform1f("size", size);
+		polyShader.setUniforms(shapeParamGroup);
 		polyShader.setUniforms(renderParamGroup);
 		mesh.drawFaces();
 		polyShader.end();
@@ -161,10 +151,6 @@ void ofApp::draw(){
 	cam.end();
 	
 	gui.draw();
-
-	//shape.draw();
-	//color.draw();
-	//animation.draw();
 
 	if (isRecording) {
 		img.grabScreen(0, 0, ofGetWidth(), ofGetHeight());

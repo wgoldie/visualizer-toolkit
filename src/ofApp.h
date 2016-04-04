@@ -28,6 +28,7 @@ class ofApp : public ofBaseApp{
 	private:
 		void regenI(int & i);
 		void regenF(float & f);
+		void regenV3(ofVec3f & f);
 		void regenHelper();
 		void setupGui();
 
@@ -39,12 +40,9 @@ class ofApp : public ofBaseApp{
 
 		ofxPanel shape;
 		ofParameterGroup shapeParamGroup;
-		ofParameter<int> gridX;
-		ofParameter<int> gridY;
-		ofParameter<int> gridZ;
+		ofParameter<ofVec3f> size;
+		ofParameter<ofVec3f> grid;
 		ofParameter<int> shapeType;
-		ofParameter<int> size;
-		ofParameter<int> iter;
 
 		ofxPanel animation;
 		ofParameterGroup animationParamGroup;
@@ -75,6 +73,7 @@ class ofApp : public ofBaseApp{
 		ofParameter<float> gradMix;
 
 		ofMesh mesh;
+		ofMesh shadow;
 		ofNode meshNode;
 
 		ofEasyCam cam;
